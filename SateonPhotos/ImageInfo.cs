@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
 using System.Windows.Media.Imaging;
@@ -49,6 +50,8 @@ namespace SateonPhotos
 
         public string Hash { get; set; }
 
+        public string format { get; set; }
+
         public new string ToString
         {
             get
@@ -79,29 +82,55 @@ namespace SateonPhotos
 
             foreach (var file in Directory.EnumerateFiles(path))
             {
-                JpegBitmapDecoder jpeg;
+                //JpegBitmapDecoder jpeg;
 
                 try
                 {
+                    
                     var filePath = Path.Combine(path, file);
                     using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                     {
-                        jpeg = new JpegBitmapDecoder(
-                            stream,
-                            BitmapCreateOptions.None,
-                            BitmapCacheOption.None
-                        );
+                        Image img = null;
+                        img = Image.FromStream(stream);
+                        string ext = new ImageFormatConverter().ConvertToString(img.RawFormat).ToLower();
 
 
+                        if (ext.ToLower() == "jpeg" || ext.ToLower() == "bmp")
+                        {
 
-                        var frame = jpeg.Frames[0];
-                        files.Add(new ImageInfo() { FilePath = file, Width = frame.PixelWidth, Height = frame.PixelHeight, Hash = GetChecksum(filePath) });
+                            files.Add(new ImageInfo()
+                            {
+                                FilePath = file,
+                                Width = img.Width,
+                                Height = img.Height,
+                                format = ext,
+                                Hash = GetChecksum(filePath)
+                            });
+
+                        }
+                        //jpeg = new JpegBitmapDecoder(
+                        //    stream,
+                        //    BitmapCreateOptions.None,
+                        //    BitmapCacheOption.None
+                        //);
+
+                        //var frame = jpeg.Frames[0];
+                        //files.Add(new ImageInfo()
+                        //{
+                        //    FilePath = file,
+                        //    Width = frame.PixelWidth,
+                        //    Height = frame.PixelHeight,
+                        //    format = ext,
+                        //    Hash = GetChecksum(filePath)
+                        //});
+
+
                     }
 
                 }
                 catch (FileFormatException)
                 {
-                    files.Add(new ImageInfo() { FilePath = file, Jpeg = false });
+                    files.Add(new ImageInfo() { FilePath = file, Jpeg = false, format = "Unknown" , Error = true });
                 }
                 catch (Exception ex)
                 {
