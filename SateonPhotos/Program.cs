@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 
 namespace SateonPhotos
@@ -26,52 +24,97 @@ namespace SateonPhotos
         {
 
             //todo:   implement checks on connection strings before we do any work
-            string SourceConnection = ConfigurationManager.ConnectionStrings["PhotoSource"].ConnectionString;
-            string DestinationConnection = ConfigurationManager.ConnectionStrings["PhotoDestination"].ConnectionString;
+            string sourceConnection = ConfigurationManager.ConnectionStrings["PhotoSource"].ConnectionString;
+            string destinationConnection = ConfigurationManager.ConnectionStrings["PhotoDestination"].ConnectionString;
 
 
-            var load =  LoadTestImages();
+            //var load =  LoadTestImages();
+
+            //todo: get all images without processed version 
+            //todo: save original to folder with employee name . extension 
+            //todo: resize image and save to file system and db table
+
+            using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["PhotoSource"].ConnectionString))
+            using (var command  = new SqlCommand("sproc_FindUnprocessedImages",connection))
+            {
+                command.CommandType = CommandType.StoredProcedure;
+                connection.Open();
+                SqlDataReader rdr = command.ExecuteReader();
+                while (rdr.Read())
+                {
+                    Image img = null;
+                    string Empno = String.Empty;
+                    String dataFormat = string.Empty;
+                    img = DbHelpers.GetImageOrDefault(rdr, "Image");
+                    Empno = DbHelpers.GetStringOrDefault(rdr, "employeeNo");
+                    string ext = new ImageFormatConverter().ConvertToString(img.RawFormat)?.ToLower();
+
+                    var x = ImageHandler.SaveImageAsJpeg(img, ConfigurationManager.AppSettings["original"] + Empno) ;
+
+                    Console.WriteLine($"{Empno} - {img.Size} {ext}");      
+
+                  }
+
+
+            }
 
 
 
 
-            var result = GetFileFromDB("9AD9FAD8E4C5690F46EEA8195F9A325AF211E039B2C31C206B", @"C:\testImages\Originals\test.jpg");
 
+                var result = GetFileFromDb("0970E4CA11AEEF8AACEEB60FEF33A429BC9BC44E26B0294B5F", @"C:\testImages\Originals\test.jpg");
 
-
+            Console.WriteLine(result.ToString());
+#if DEBUG
+            Console.Read();
+#endif
             //throw new NotImplementedException();
         }
 
 
-        public static bool GetFileFromDB(string varID, string varPathToNewLocation)
+        public static bool GetFileFromDb(string varId, string varPathToNewLocation)
         {
             using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["PhotoSource"].ConnectionString))
-            using (var sqlQuery = new SqlCommand(@"SELECT image,dataformat FROM [dbo].[OriginalPhotos] WHERE [employeeNo] = @varID", connection))
+            using (var sqlQuery = new SqlCommand(@"SELECT top 1 employeeNo,image,dataformat FROM [dbo].[OriginalPhotos] WHERE [employeeNo] = @varID", connection))
             {
-                sqlQuery.Parameters.AddWithValue("@varID", varID);
-                connection.Open();
-                using (var sqlQueryResult = sqlQuery.ExecuteReader())
-                    if (sqlQueryResult.HasRows)
-                    {
-                        sqlQueryResult.Read();
-                        var blob = new Byte[(sqlQueryResult.GetBytes(0, 0, null, 0, int.MaxValue))];
-                        sqlQueryResult.GetBytes(0, 0, blob, 0, blob.Length);
-                        var dataFormat = sqlQueryResult["dataFormat"];
-                        using (var fs = new FileStream(varPathToNewLocation + "." + dataFormat.ToString(), FileMode.Create, FileAccess.Write))
-                            fs.Write(blob, 0, blob.Length);
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                sqlQuery.Parameters.AddWithValue("@varID", varId);
+                try
+                {
+                    connection.Open();
+                    using (var sqlQueryResult = sqlQuery.ExecuteReader())
+                        if (sqlQueryResult.HasRows)
+                        {
+                            sqlQueryResult.Read();
+                            var blob = new Byte[(sqlQueryResult.GetBytes(1, 0, null, 0, int.MaxValue))];
+                            sqlQueryResult.GetBytes(1, 0, blob, 0, blob.Length);
+                            var dataFormat = sqlQueryResult["dataFormat"];
+
+
+                            using (var fs = new FileStream(varPathToNewLocation + "." + dataFormat.ToString(), FileMode.Create, FileAccess.Write))
+                            {
+                                fs.Write(blob, 0, blob.Length);
+                            }
+
+
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
         }
 
         static bool LoadTestImages()
         {
 
-            var SrcFiles = ImageInfo.GetFiles(ConfigurationManager.AppSettings["testfilepath"]).Where(x => x.Jpeg);
+            var srcFiles = ImageInfo.GetFiles(ConfigurationManager.AppSettings["testfilepath"]).Where(x => x.Jpeg);
 
             using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["PhotoSource"]
                 .ConnectionString))
@@ -84,7 +127,7 @@ namespace SateonPhotos
 
                     connection.Open();
 
-                    foreach (var image in SrcFiles)
+                    foreach (var image in srcFiles)
                     {
 
                         try
@@ -105,7 +148,7 @@ namespace SateonPhotos
                                 command.Parameters.AddWithValue("@image", file2);
                                 command.Parameters.AddWithValue("@height", image.Height);
                                 command.Parameters.AddWithValue("@width", image.Width);
-                                command.Parameters.AddWithValue("@dataformat", image.format);
+                                command.Parameters.AddWithValue("@dataformat", image.Format);
                                 command.Parameters.AddWithValue("@filename", image.FileName);
 
                                 command.ExecuteNonQuery();

@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace SateonPhotos.Tests
 {
@@ -23,5 +22,18 @@ namespace SateonPhotos.Tests
         {
 
         }
+
+        [TestMethod, TestCategory("Unit"), Owner("DESKTOP-M900E5G\\k7")]
+        public void check_test_images_loaded()
+        {
+            
+        }
+
+        [TestMethod, TestCategory("Unit"), Owner("DESKTOP-M900E5G\\k7")]
+        public void Recongise_Jpeg()
+        {
+            
+        }
+
     }
 }

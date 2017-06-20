@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Security.Cryptography;
-using System.Windows.Media.Imaging;
+
 // ReSharper disable NonReadonlyMemberInGetHashCode
 
 
@@ -50,7 +50,7 @@ namespace SateonPhotos
 
         public string Hash { get; set; }
 
-        public string format { get; set; }
+        public string Format { get; set; }
 
         public new string ToString
         {
@@ -90,9 +90,9 @@ namespace SateonPhotos
                     var filePath = Path.Combine(path, file);
                     using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                     {
-                        Image img = null;
+                        Image img;
                         img = Image.FromStream(stream);
-                        string ext = new ImageFormatConverter().ConvertToString(img.RawFormat).ToLower();
+                        string ext = new ImageFormatConverter().ConvertToString(img.RawFormat)?.ToLower();
 
 
                         if (ext.ToLower() == "jpeg" || ext.ToLower() == "bmp")
@@ -103,7 +103,7 @@ namespace SateonPhotos
                                 FilePath = file,
                                 Width = img.Width,
                                 Height = img.Height,
-                                format = ext,
+                                Format = ext,
                                 Hash = GetChecksum(filePath)
                             });
 
@@ -130,7 +130,7 @@ namespace SateonPhotos
                 }
                 catch (FileFormatException)
                 {
-                    files.Add(new ImageInfo() { FilePath = file, Jpeg = false, format = "Unknown" , Error = true });
+                    files.Add(new ImageInfo() { FilePath = file, Jpeg = false, Format = "Unknown" , Error = true });
                 }
                 catch (Exception ex)
                 {
