@@ -76,6 +76,50 @@ namespace SateonPhotos
             }
         }
 
+        public static ImageInfo readFileDetails(string filePath)
+        {
+
+            try
+            {
+
+                
+                using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    Image img;
+                    img = Image.FromStream(stream);
+                    string ext = new ImageFormatConverter().ConvertToString(img.RawFormat)?.ToLower() ?? string.Empty;
+
+
+                    if (ext.ToLower() == "jpeg" || ext.ToLower() == "bmp")
+                    {
+
+                        return new ImageInfo()
+                        {
+                            FilePath = filePath,
+                            Width = img.Width,
+                            Height = img.Height,
+                            Format = ext,
+                            Hash = GetChecksum(filePath)
+                        };
+
+                    }
+                  
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("error: {0}", ex.Message);
+                
+
+            }
+
+
+            return null;
+
+
+        }
+
         public static List<ImageInfo> GetFiles(String path)
         {
             var files = new List<ImageInfo>();

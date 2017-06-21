@@ -3,6 +3,7 @@ using System.Drawing.Imaging;
 using System.Drawing;
 using System.IO;
 using Encoder = System.Drawing.Imaging.Encoder;
+
 // ReSharper disable RedundantCast
 
 namespace SateonPhotos
@@ -54,36 +55,21 @@ namespace SateonPhotos
             {
                 Bitmap newImage = ResizeImage(image, maxWidth, maxHeight, quality);
                 var x = SaveImageAsJpeg(newImage, filePath, quality);
-
-                //// Get an ImageCodecInfo object that represents the JPEG codec.
-                //ImageCodecInfo imageCodecInfo = GetEncoderInfo(ImageFormat.Jpeg);
-
-                //// Create an Encoder object for the Quality parameter.
-                //Encoder encoder = Encoder.Quality;
-
-                //// Create an EncoderParameters object. 
-                //EncoderParameters encoderParameters = new EncoderParameters(1);
-
-                //// Save the image as a JPEG file with quality level.
-                //EncoderParameter encoderParameter = new EncoderParameter(encoder, quality);
-                //encoderParameters.Param[0] = encoderParameter;
-                //newImage.Save(filePath, imageCodecInfo, encoderParameters);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 throw;
             }
-            
         }
 
 
-        public static bool SaveImageAsJpeg(Image img, string filePath,int quality = 80)
+        public static bool SaveImageAsJpeg(Image img, string filePath, int quality = 80)
         {
             try
             {
                 Image newImage = img;
-          
+
                 // Get an ImageCodecInfo object that represents the JPEG codec.
                 ImageCodecInfo imageCodecInfo = GetEncoderInfo(ImageFormat.Jpeg);
 
@@ -96,7 +82,8 @@ namespace SateonPhotos
                 // Save the image as a JPEG file with quality level.
                 EncoderParameter encoderParameter = new EncoderParameter(encoder, quality);
                 encoderParameters.Param[0] = encoderParameter;
-                newImage.Save((filePath.Contains(".jpg") ? filePath : filePath + ".jpg"), imageCodecInfo, encoderParameters);
+                newImage.Save((filePath.Contains(".jpg") ? filePath : filePath + ".jpg"), imageCodecInfo,
+                    encoderParameters);
             }
             catch (Exception e)
             {
@@ -123,13 +110,13 @@ namespace SateonPhotos
             int originalHeight = image.Height;
 
             // To preserve the aspect ratio
-            float ratioX = (float)maxWidth / (float)originalWidth;
-            float ratioY = (float)maxHeight / (float)originalHeight;
+            float ratioX = (float) maxWidth / (float) originalWidth;
+            float ratioY = (float) maxHeight / (float) originalHeight;
             float ratio = Math.Min(ratioX, ratioY);
 
             // New width and height based on aspect ratio
-            int newWidth = (int)(originalWidth * ratio);
-            int newHeight = (int)(originalHeight * ratio);
+            int newWidth = (int) (originalWidth * ratio);
+            int newHeight = (int) (originalHeight * ratio);
 
             // Convert other formats (including CMYK) to RGB.
             Bitmap newImage = new Bitmap(newWidth, newHeight, PixelFormat.Format24bppRgb);
@@ -171,8 +158,10 @@ namespace SateonPhotos
         public byte[] ImageToByteArray(Image imageIn)
         {
             MemoryStream ms = new MemoryStream();
-            imageIn.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+            imageIn.Save(ms, ImageFormat.Jpeg);
             return ms.ToArray();
         }
+
+
     }
 }
