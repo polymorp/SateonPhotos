@@ -43,16 +43,18 @@ namespace SateonPhotos
                 while (rdr.Read())
                 {
                     Image img = null;
-                    string Empno = String.Empty;
+                    string empno = String.Empty;
                     String dataFormat = string.Empty;
                     img = DbHelpers.GetImageOrDefault(rdr, "Image");
-                    Empno = DbHelpers.GetStringOrDefault(rdr, "employeeNo");
+                    empno = DbHelpers.GetStringOrDefault(rdr, "employeeNo");
                     string ext = new ImageFormatConverter().ConvertToString(img.RawFormat)?.ToLower();
 
-                    var x = ImageHandler.SaveImageAsJpeg(img, ConfigurationManager.AppSettings["original"] + Empno) ;
+                    var x = ImageHandler.SaveImageAsJpeg(img, ConfigurationManager.AppSettings["original"] + empno) ;
+                    ImageHandler.ResizeAndSavetoDisc( new Bitmap(img), 200, 200, 80,
+                        ConfigurationManager.AppSettings["processed"] + empno);
 
-                    Console.WriteLine($"{Empno} - {img.Size} {ext}");      
-
+                    Console.WriteLine($"{empno} - {img.Size} {ext}");      
+                    
                   }
 
 

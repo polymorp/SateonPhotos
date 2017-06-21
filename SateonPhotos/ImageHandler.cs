@@ -23,7 +23,7 @@ namespace SateonPhotos
         /// <param name="maxHeight">resize height.</param>
         /// <param name="quality">quality setting value.</param>
         /// <param name="filePath">file path.</param>      
-        public void ResizeAndSavetoDisc(Bitmap image, int maxWidth, int maxHeight, int quality, string filePath)
+        public static void ResizeAndSavetoDisc(Bitmap image, int maxWidth, int maxHeight, int quality, string filePath)
         {
             //// Get the image's original width and height
             //int originalWidth = image.Width;
@@ -116,7 +116,7 @@ namespace SateonPhotos
         /// <param name="maxHeight">resize height.</param>
         /// <param name="quality">quality setting value.</param>
         /// <returns>Bitmap</returns>
-        public Bitmap ResizeImage(Bitmap image, int maxWidth, int maxHeight, int quality)
+        public static Bitmap ResizeImage(Bitmap image, int maxWidth, int maxHeight, int quality)
         {
             // Get the image's original width and height
             int originalWidth = image.Width;
@@ -166,6 +166,13 @@ namespace SateonPhotos
             MemoryStream ms = new MemoryStream(byteArrayIn);
             Image returnImage = Image.FromStream(ms);
             return returnImage;
+        }
+
+        public byte[] ImageToByteArray(Image imageIn)
+        {
+            MemoryStream ms = new MemoryStream();
+            imageIn.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+            return ms.ToArray();
         }
     }
 }

@@ -88,7 +88,7 @@ namespace SateonPhotos
             }
             else
             {
-                byte[] picData = reader[columnName] as byte[] ?? null;
+                byte[] picData = reader[columnName] as byte[];
                 return  ImageHandler.ByteArrayToImage(picData);
             }
             
