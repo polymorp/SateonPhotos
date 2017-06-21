@@ -59,7 +59,7 @@ namespace SateonPhotos
                         ImageInfo.readFileDetails(appSetting.ResizedImageFilesystemFolder + empno + ".jpg");
 
 
-                    SaveFileToDb(resultInfo, "WriteImageToProcessed");
+                    SaveFileToDb(resultInfo, "WriteImageToProcessed",empno);
 
                     Console.WriteLine($"{empno} - {img.Size} {ext}");
                 }
@@ -67,12 +67,12 @@ namespace SateonPhotos
 
 
 #if DEBUG
-            var result = GetFileFromDb("0970E4CA11AEEF8AACEEB60FEF33A429BC9BC44E26B0294B5F",
-                @"C:\testImages\Originals\test.jpg");
+            //var result = GetFileFromDb("0970E4CA11AEEF8AACEEB60FEF33A429BC9BC44E26B0294B5F",
+            //    @"C:\testImages\Originals\test.jpg");
 
-            Console.WriteLine(result.ToString());
+            //Console.WriteLine(result.ToString());
 
-            Console.Read();
+            //Console.Read();
 #endif
             //throw new NotImplementedException();
         }
@@ -120,14 +120,14 @@ namespace SateonPhotos
             }
         }
 
-        public bool SaveFileToDb(ImageInfo image, string sprocName)
+        public bool SaveFileToDb(ImageInfo image, string sprocName, string identifier)
         {
             // sanity check inputs
 
 
             try
             {
-                if (image == null || sprocName == null)
+                if (image == null ||  sprocName == null)
                 {
                     throw new System.ArgumentException("SaveFileToDb Parameters cannot be null");
                 }
@@ -147,12 +147,12 @@ namespace SateonPhotos
                             byte[] file2;
                             using (var reader = new BinaryReader(stream))
                             {
-                                file2 = reader.ReadBytes((int) stream.Length);
+                                file2 = reader.ReadBytes((int)stream.Length);
                             }
 
                             command.Parameters.Clear();
 
-                            command.Parameters.AddWithValue("@employeeNo", image.Hash);
+                            command.Parameters.AddWithValue("@employeeNo", identifier);
                             command.Parameters.AddWithValue("@image", file2);
                             command.Parameters.AddWithValue("@height", image.Height);
                             command.Parameters.AddWithValue("@width", image.Width);

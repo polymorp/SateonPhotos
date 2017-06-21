@@ -1,0 +1,137 @@
+﻿USE [bsd]
+GO
+/****** Object:  Table [dbo].[OriginalPhotos]    Script Date: 22/06/2017 00:16:58 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[OriginalPhotos](
+	[employeeNo] [varchar](50) NOT NULL,
+	[image] [varbinary](max) NULL,
+	[height] [int] NULL,
+	[width] [int] NULL,
+	[dataFormat] [varchar](50) NULL,
+	[filename] [varchar](50) NULL,
+ CONSTRAINT [PK_OriginalPhotos] PRIMARY KEY CLUSTERED 
+(
+	[employeeNo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  Table [dbo].[ProcessedPhotos]    Script Date: 22/06/2017 00:16:58 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_PADDING ON
+GO
+CREATE TABLE [dbo].[ProcessedPhotos](
+	[employeeNo] [varchar](50) NOT NULL,
+	[image] [varbinary](max) NULL,
+	[height] [int] NULL,
+	[width] [int] NULL,
+	[dataFormat] [varchar](50) NULL,
+	[filename] [varchar](50) NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+SET ANSI_PADDING OFF
+GO
+/****** Object:  StoredProcedure [dbo].[ReadImageToOriginal]    Script Date: 22/06/2017 00:16:58 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE procedure [dbo].[ReadImageToOriginal]
+@employeeNo varchar(50),
+@image varbinary(MAX),
+@height int = 0,
+@width int = 0,
+@dataFormat varchar(50) = NULL
+
+as
+
+INSERT INTO [dbo].[OriginalPhotos]
+           ([employeeNo]
+           ,[image]
+           ,[height]
+           ,[width]
+           ,[dataFormat])
+     VALUES
+          (@employeeNo, @image,@height,@width,@dataFormat)
+
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[sproc_FindUnprocessedImages]    Script Date: 22/06/2017 00:16:58 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create procedure [dbo].[sproc_FindUnprocessedImages]
+as
+SELECT o.employeeNo,o.image,o.dataFormat
+  FROM [OriginalPhotos] o
+  left join [ProcessedPhotos] p on o.employeeNo = p.employeeNo
+  where p.employeeNo is null
+
+GO
+/****** Object:  StoredProcedure [dbo].[WriteImageToOriginal]    Script Date: 22/06/2017 00:16:58 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE procedure [dbo].[WriteImageToOriginal]
+@employeeNo varchar(50),
+@image varbinary(MAX),
+@height int = 0,
+@width int = 0,
+@dataFormat varchar(50) = NULL,
+@filename varchar(50) = ''
+
+as
+
+INSERT INTO [dbo].[OriginalPhotos]
+           ([employeeNo]
+           ,[image]
+           ,[height]
+           ,[width]
+           ,[dataFormat]
+		   ,filename)
+     VALUES
+          (@employeeNo, @image,@height,@width,@dataFormat,@filename)
+
+
+GO
+/****** Object:  StoredProcedure [dbo].[WriteImageToProcessed]    Script Date: 22/06/2017 00:16:58 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE procedure [dbo].[WriteImageToProcessed]
+@employeeNo varchar(50),
+@image varbinary(MAX),
+@height int = 0,
+@width int = 0,
+@dataFormat varchar(50) = NULL,
+@filename varchar(50) 
+as
+
+INSERT INTO [dbo].processedPhotos
+           ([employeeNo]
+           ,[image]
+           ,[height]
+           ,[width]
+           ,[dataFormat]
+		   ,filename)
+     VALUES
+          (@employeeNo, @image,@height,@width,@dataFormat,@filename)
+
+
+GO
