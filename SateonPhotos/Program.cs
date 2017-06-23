@@ -6,7 +6,7 @@
         {
            var process = new  PhotoSystem();
             process.ProcessPhotos();
-
+            
         }
     }
 }

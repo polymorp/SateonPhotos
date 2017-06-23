@@ -44,15 +44,16 @@ namespace SateonPhotos
                     string empno;
                     String dataFormat = string.Empty;
                     img = DbHelpers.GetImageOrDefault(rdr, "Image");
-                    empno = DbHelpers.GetStringOrDefault(rdr, "employeeNo");
+                    empno = DbHelpers.GetStringOrDefault(rdr, "identifier").Trim();
+                    
                     string ext = new ImageFormatConverter().ConvertToString(img.RawFormat)?.ToLower();
 
-                    var x = ImageHandler.SaveImageAsJpeg(img, appSetting.SourceImageFilesystemFolder + empno);
+                    var x = ImageHandler.SaveImageAsJpeg(img, appSetting.SourceImageFilesystemFolder + empno + ".jpg");
                     Bitmap resizedBitmap = ImageHandler.ResizeImage(new Bitmap(img), 200, 200, 80);
 
                     // Resize and save processed to disk
                     //ImageHandler.ResizeAndSavetoDisc( new Bitmap(img), 200, 200, 80, appSetting.ResizedImageFilesystemFolder + empno);
-                    ImageHandler.SaveImageAsJpeg(resizedBitmap, appSetting.ResizedImageFilesystemFolder + empno);
+                    ImageHandler.SaveImageAsJpeg(resizedBitmap, appSetting.ResizedImageFilesystemFolder + empno + ".jpg");
 
 
                     ImageInfo resultInfo =
@@ -157,7 +158,8 @@ namespace SateonPhotos
                             command.Parameters.AddWithValue("@height", image.Height);
                             command.Parameters.AddWithValue("@width", image.Width);
                             command.Parameters.AddWithValue("@dataformat", image.Format);
-                            command.Parameters.AddWithValue("@filename", image.FileName);
+                           // command.Parameters.AddWithValue("@filesize", image.Size);
+                            command.Parameters.AddWithValue("@dt", DateTime.UtcNow);
 
                             command.ExecuteNonQuery();
                         }
